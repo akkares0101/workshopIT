@@ -1,13 +1,12 @@
 // src/App.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { API_BASE, apiRequest } from "./api";
-import { useEffect, useState } from "react";
 import logoMT from "./assets/mdt.png";
 import { AlertContainer, useAlert } from "./AlertContext";
 
-// ====== Component ป้องกันหน้า ======
+// ================== Component ป้องกันหน้า (PrivateRoute) ==================
 function PrivateRoute({ children, roles }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="p-6 text-center">กำลังโหลด...</div>;
@@ -20,7 +19,7 @@ function PrivateRoute({ children, roles }) {
   return children;
 }
 
-// ====== Navbar ======
+// ================== Navbar ==================
 function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +27,7 @@ function Navbar() {
   return (
     <nav className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* โลโก้ + ชื่อระบบ */}
         <div className="flex items-center gap-3">
           <img
             src={logoMT}
@@ -104,7 +104,7 @@ function Navbar() {
   );
 }
 
-// ====== หน้า Login ======
+// ================== หน้า Login ==================
 function LoginPage() {
   const { user, login } = useAuth();
   const { showAlert } = useAlert();
@@ -113,8 +113,12 @@ function LoginPage() {
   const [password, setPassword] = useState("teacher123");
   const [error, setError] = useState("");
 
+  // ถ้าล็อกอินแล้วให้เด้งตาม role
   useEffect(() => {
-    if (user) navigate("/dashboard");
+    if (user) {
+      if (user.role === "admin") navigate("/admin");
+      else navigate("/dashboard");
+    }
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -123,7 +127,7 @@ function LoginPage() {
     try {
       await login(email, password);
       showAlert("ล็อกอินสำเร็จ ยินดีต้อนรับคุณครู 🌈", "success");
-      navigate("/dashboard");
+      // navigation จะจัดการใน useEffect ด้านบน
     } catch (err) {
       const msg = err.message || "ล็อกอินไม่สำเร็จ";
       setError(msg);
@@ -182,6 +186,8 @@ function LoginPage() {
     </div>
   );
 }
+
+// ================== Modal พรีวิวใบงาน ==================
 function PreviewModal({ worksheet, onClose }) {
   if (!worksheet) return null;
 
@@ -197,7 +203,6 @@ function PreviewModal({ worksheet, onClose }) {
 
   const isPdf = lower.endsWith(".pdf");
 
-  // แปลงวันที่ให้เป็นอ่านง่าย ๆ (ถ้า backend ส่ง createdAt มา)
   let createdAtText = "";
   if (worksheet.createdAt) {
     try {
@@ -237,7 +242,7 @@ function PreviewModal({ worksheet, onClose }) {
           </button>
         </div>
 
-        {/* BODY: ส่วนสรุปเนื้อหาแบบย่อ */}
+        {/* BODY (รายละเอียดใบงาน) */}
         <div className="px-4 pt-4 pb-3 bg-slate-50/60">
           <div className="grid gap-3 md:grid-cols-[2fr,1.4fr] items-start">
             {/* ซ้าย: เนื้อหาแบบย่อ */}
@@ -267,13 +272,14 @@ function PreviewModal({ worksheet, onClose }) {
                   {worksheet.pages ? `${worksheet.pages} หน้า` : "ไม่ระบุ"}
                 </li>
                 <li>
-                  • จัดทำโดย: {worksheet.uploaderName || "คุณครู Media & Training"}
+                  • จัดทำโดย:{" "}
+                  {worksheet.uploaderName || "คุณครู Media & Training"}
                 </li>
                 {createdAtText && <li>• ลงเมื่อ: {createdAtText}</li>}
               </ul>
             </div>
 
-            {/* ขวา: ข้อมูลเสริมเล็ก ๆ น้อย ๆ */}
+            {/* ขวา: ไอเดียการใช้ + ข้อมูลไฟล์ */}
             <div className="bg-white/80 rounded-2xl border border-slate-100 p-3 sm:p-4 text-[11px] sm:text-xs text-slate-600 space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-lg">💡</span>
@@ -288,12 +294,11 @@ function PreviewModal({ worksheet, onClose }) {
               </ul>
 
               <div className="pt-2 border-t border-dashed border-slate-200/70">
-                <p className="font-semibold text-slate-700 mb-1">
-                  ข้อมูลไฟล์
-                </p>
+                <p className="font-semibold text-slate-700 mb-1">ข้อมูลไฟล์</p>
                 <p className="text-[11px] break-all">
                   ชื่อไฟล์:{" "}
-                  {worksheet.originalName || "ยังไม่มีชื่อไฟล์ที่ระบบบันทึกไว้"}
+                  {worksheet.originalName ||
+                    "ยังไม่มีชื่อไฟล์ที่ระบบบันทึกไว้"}
                 </p>
                 <p className="text-[11px]">
                   สถานะไฟล์:{" "}
@@ -312,7 +317,7 @@ function PreviewModal({ worksheet, onClose }) {
           </div>
         </div>
 
-        {/* ตัวอย่างไฟล์จริง */}
+        {/* PREVIEW ไฟล์จริง */}
         <div className="bg-slate-100/60 px-4 pb-4">
           {url ? (
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
@@ -368,8 +373,9 @@ function PreviewModal({ worksheet, onClose }) {
   );
 }
 
-// ====== Grid ใบงานสำหรับนักเรียน ======
+// ================== Grid ใบงานสำหรับนักเรียน (หน้าแรก) ==================
 function StudentWorksheetGrid() {
+  const { showAlert } = useAlert();
   const [worksheets, setWorksheets] = useState([]);
   const [subject, setSubject] = useState("ทั้งหมด");
   const [grade, setGrade] = useState("ทั้งหมด");
@@ -380,13 +386,22 @@ function StudentWorksheetGrid() {
   const GRADE_OPTIONS = ["ทั้งหมด", "อนุบาล", "ประถมต้น", "ประถมปลาย"];
 
   const loadWorksheets = async () => {
-    const params = new URLSearchParams();
-    if (subject !== "ทั้งหมด") params.append("subject", subject);
-    if (grade !== "ทั้งหมด") params.append("grade", grade);
-    if (search) params.append("search", search);
-    const res = await fetch(`${API_BASE}/api/worksheets?${params.toString()}`);
-    const data = await res.json();
-    setWorksheets(data);
+    try {
+      const params = new URLSearchParams();
+      if (subject !== "ทั้งหมด") params.append("subject", subject);
+      if (grade !== "ทั้งหมด") params.append("grade", grade);
+      if (search) params.append("search", search);
+
+      let path = "/api/worksheets";
+      const query = params.toString();
+      if (query) path += `?${query}`;
+
+      const data = await apiRequest(path);
+      setWorksheets(data);
+    } catch (err) {
+      console.error("โหลดใบงานผิดพลาด:", err);
+      showAlert("โหลดใบงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", "error");
+    }
   };
 
   useEffect(() => {
@@ -399,7 +414,6 @@ function StudentWorksheetGrid() {
     loadWorksheets();
   };
 
-  // เลือกอีโมจิตามวิชา น่ารัก ๆ
   const getSubjectEmoji = (subject) => {
     switch (subject) {
       case "คณิตศาสตร์":
@@ -413,7 +427,6 @@ function StudentWorksheetGrid() {
     }
   };
 
-  // สีป้ายวิชาประมาณ ๆ
   const getSubjectBadgeClass = (subject) => {
     switch (subject) {
       case "คณิตศาสตร์":
@@ -445,7 +458,7 @@ function StudentWorksheetGrid() {
           </p>
         </header>
 
-        {/* ฟิลเตอร์น่ารัก ๆ */}
+        {/* ฟิลเตอร์ */}
         <form
           onSubmit={handleFilter}
           className="bg-white/90 backdrop-blur rounded-3xl shadow-md p-4 border border-pink-100 flex flex-col gap-3 md:flex-row md:items-end md:gap-4"
@@ -508,11 +521,9 @@ function StudentWorksheetGrid() {
                 key={w.id}
                 className="group bg-white/95 rounded-3xl border border-pink-100 shadow-sm hover:shadow-[0_16px_35px_rgba(248,113,113,0.35)] hover:-translate-y-1 hover:-rotate-1 transition-all duration-200 flex flex-col overflow-hidden"
               >
-                {/* แถบสีด้านบน */}
                 <div className="h-2 w-full bg-gradient-to-r from-pink-300 via-amber-300 to-sky-300" />
 
                 <div className="p-4 flex-1 flex flex-col">
-                  {/* แท็กวิชา/ระดับ */}
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex flex-wrap gap-1">
                       <span
@@ -536,12 +547,10 @@ function StudentWorksheetGrid() {
                     </span>
                   </div>
 
-                  {/* ชื่อใบงาน */}
                   <h3 className="text-sm font-semibold line-clamp-2 mb-1 text-slate-800">
                     {w.title}
                   </h3>
 
-                  {/* คำอธิบาย */}
                   <p className="text-xs text-slate-600 line-clamp-3 mb-2">
                     {w.description}
                   </p>
@@ -551,7 +560,6 @@ function StudentWorksheetGrid() {
                   </p>
                 </div>
 
-                {/* ปุ่มด้านล่าง */}
                 <div className="px-4 pb-4 flex gap-2">
                   <button
                     type="button"
@@ -586,14 +594,14 @@ function StudentWorksheetGrid() {
       </div>
 
       {/* modal พรีวิว */}
-        {preview && (
-          <PreviewModal worksheet={preview} onClose={() => setPreview(null)} />
-        )}
+      {preview && (
+        <PreviewModal worksheet={preview} onClose={() => setPreview(null)} />
+      )}
     </>
   );
 }
 
-// ====== ฟอร์มอัปโหลด (สำหรับครู) + File Manager ======
+// ================== ฟอร์มอัปโหลด + File Manager (แดชบอร์ดครู) ==================
 function TeacherDashboard() {
   const { showAlert } = useAlert();
   const { user } = useAuth();
@@ -614,8 +622,13 @@ function TeacherDashboard() {
   const DIFFICULTY_OPTIONS = ["ง่าย", "ปานกลาง", "ยาก"];
 
   const loadMyFiles = async () => {
-    const data = await apiRequest("/api/worksheets/mine");
-    setMyFiles(data);
+    try {
+      const data = await apiRequest("/api/worksheets/mine");
+      setMyFiles(data);
+    } catch (err) {
+      console.error("โหลดใบงานของฉันผิดพลาด:", err);
+      showAlert("โหลดใบงานของคุณไม่สำเร็จ", "error");
+    }
   };
 
   useEffect(() => {
@@ -623,64 +636,69 @@ function TeacherDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-const handleUpload = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  if (!file) {
-    const msg = "กรุณาเลือกไฟล์ใบงานก่อนอัปโหลดนะครับ 🥺";
-    setError(msg);
-    showAlert(msg, "warning");
-    return;
-  }
-
-  try {
-    setUploading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("subject", subject);
-    formData.append("grade", grade);
-    formData.append("difficulty", difficulty);
-    formData.append("pages", pages);
-    formData.append("description", description);
-
-    const token = localStorage.getItem("token");
-
-    // 👇 ประกาศตัวแปร res ตรงนี้ให้ชัดเจน
-    const res = await fetch(`${API_BASE}/api/worksheets`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || "อัปโหลดไม่สำเร็จ");
+    if (!file) {
+      const msg = "กรุณาเลือกไฟล์ใบงานก่อนอัปโหลดนะครับ 🥺";
+      setError(msg);
+      showAlert(msg, "warning");
+      return;
     }
 
-    await res.json();
+    if (user.role !== "teacher" && user.role !== "admin") {
+      const msg = "เฉพาะคุณครูหรือผู้ดูแลเท่านั้นที่อัปโหลดใบงานได้";
+      setError(msg);
+      showAlert(msg, "error");
+      return;
+    }
 
-    // reset ฟอร์ม
-    setTitle("");
-    setPages("");
-    setDescription("");
-    setFile(null);
-    e.target.reset();
+    try {
+      setUploading(true);
 
-    await loadMyFiles();
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("subject", subject);
+      formData.append("grade", grade);
+      formData.append("difficulty", difficulty);
+      formData.append("pages", pages);
+      formData.append("description", description);
 
-    showAlert("อัปโหลดใบงานเรียบร้อยแล้ว 🎉", "success");
-  } catch (err) {
-    setError(err.message);
-    showAlert(err.message || "อัปโหลดไม่สำเร็จ", "error");
-  } finally {
-    setUploading(false);
-  }
-};
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API_BASE}/api/worksheets`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "อัปโหลดไม่สำเร็จ");
+      }
+
+      await res.json();
+
+      setTitle("");
+      setPages("");
+      setDescription("");
+      setFile(null);
+      e.target.reset();
+
+      await loadMyFiles();
+
+      showAlert("อัปโหลดใบงานเรียบร้อยแล้ว 🎉", "success");
+    } catch (err) {
+      setError(err.message);
+      showAlert(err.message || "อัปโหลดไม่สำเร็จ", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -855,7 +873,7 @@ const handleUpload = async (e) => {
   );
 }
 
-// ====== Admin Panel ======
+// ================== Admin Panel ==================
 function AdminPanel() {
   const { showAlert } = useAlert();
   const [users, setUsers] = useState([]);
@@ -863,25 +881,29 @@ function AdminPanel() {
   const { user } = useAuth();
 
   const loadData = async () => {
-    const [u, w] = await Promise.all([
-      apiRequest("/api/admin/users"),
-      apiRequest("/api/admin/worksheets"),
-    ]);
-    setUsers(u);
-    setWorksheets(w);
+    try {
+      const [u, w] = await Promise.all([
+        apiRequest("/api/admin/users"),
+        apiRequest("/api/admin/worksheets"),
+      ]);
+      setUsers(u);
+      setWorksheets(w);
+    } catch (err) {
+      console.error("โหลดข้อมูล admin ผิดพลาด:", err);
+      showAlert("โหลดข้อมูลสำหรับ Admin ไม่สำเร็จ", "error");
+    }
   };
 
- const deleteWorksheet = async (id) => {
-  if (!window.confirm("ต้องการลบใบงานนี้จริงหรือไม่?")) return;
-  try {
-    await apiRequest(`/api/worksheets/${id}`, { method: "DELETE" });
-    await loadData();
-    showAlert("ลบใบงานจากระบบเรียบร้อยแล้ว 🧹", "success");
-  } catch (err) {
-    showAlert(err.message || "ลบใบงานไม่สำเร็จ", "error");
-  }
-};
-
+  const deleteWorksheet = async (id) => {
+    if (!window.confirm("ต้องการลบใบงานนี้จริงหรือไม่?")) return;
+    try {
+      await apiRequest(`/api/worksheets/${id}`, { method: "DELETE" });
+      await loadData();
+      showAlert("ลบใบงานจากระบบเรียบร้อยแล้ว 🧹", "success");
+    } catch (err) {
+      showAlert(err.message || "ลบใบงานไม่สำเร็จ", "error");
+    }
+  };
 
   useEffect(() => {
     if (user) loadData();
@@ -897,6 +919,7 @@ function AdminPanel() {
         </p>
       </header>
 
+      {/* ตารางผู้ใช้ */}
       <section className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 space-y-3">
         <h2 className="text-lg font-semibold">ผู้ใช้ทั้งหมด</h2>
         <div className="overflow-x-auto">
@@ -923,6 +946,7 @@ function AdminPanel() {
         </div>
       </section>
 
+      {/* ตารางใบงานทั้งหมด */}
       <section className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 space-y-3">
         <h2 className="text-lg font-semibold">ใบงานทั้งหมด</h2>
         {worksheets.length === 0 ? (
@@ -982,7 +1006,7 @@ function AdminPanel() {
   );
 }
 
-// ====== App Routes ======
+// ================== App Routes หลัก ==================
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -992,8 +1016,13 @@ export default function App() {
       <Navbar />
 
       <Routes>
+        {/* หน้าแรก: ใบงานนักเรียน (ไม่บังคับล็อกอิน) */}
         <Route path="/" element={<StudentWorksheetGrid />} />
+
+        {/* หน้า Login */}
         <Route path="/login" element={<LoginPage />} />
+
+        {/* แดชบอร์ดครู/ผู้ปกครอง */}
         <Route
           path="/dashboard"
           element={
@@ -1002,6 +1031,8 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
+        {/* Admin Panel */}
         <Route
           path="/admin"
           element={
@@ -1010,6 +1041,8 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
+        {/* เส้นทางอื่น ๆ ส่งกลับหน้าแรก */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
 
