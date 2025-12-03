@@ -20,56 +20,59 @@ function PrivateRoute({ children, roles }) {
 }
 
 // ================== Navbar ==================
+// ====== Navbar (แทนของเดิมได้เลย) ======
 function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <nav className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <nav className="sticky top-0 z-30 bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400 text-white shadow-lg">
+      <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
         {/* โลโก้ + ชื่อระบบ */}
         <div className="flex items-center gap-3">
-          <img
-            src={logoMT}
-            alt="Media & Training logo"
-            className="h-9 w-9 rounded-xl object-contain shadow-soft"
-          />
+          <div className="relative">
+            <div className="absolute -inset-1 rounded-2xl bg-white/30 blur-sm" />
+            <img
+              src={logoMT}
+              alt="Media & Training logo"
+              className="relative h-10 w-10 rounded-2xl object-contain border border-white/70 shadow-md bg-white"
+            />
+          </div>
           <div className="leading-tight">
             <Link
               to="/"
-              className="block font-semibold text-slate-900 tracking-tight"
+              className="block font-semibold tracking-tight text-sm sm:text-base"
             >
               Media &amp; Training
             </Link>
-            <p className="text-[11px] text-slate-400">
-              สื่อการสอน &amp; ใบงานสำหรับเด็ก
+            <p className="text-[11px] text-sky-50/90">
+              สื่อการสอน &amp; ใบงานสำหรับเด็กอนุบาลและประถม
             </p>
           </div>
         </div>
 
         {/* เมนูด้านขวา */}
-        <div className="flex items-center gap-3 text-sm">
-          <Link
-            to="/"
-            className="hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100"
-          >
-            ใบงานนักเรียน
-          </Link>
-
+        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
           {user && (
             <>
               <Link
-                to="/dashboard"
-                className="hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100"
+                to="/worksheets"
+                className="hidden sm:inline-flex items-center rounded-full px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 transition"
               >
-                สำหรับครู/ผู้ปกครอง
+                📚 ใบงานนักเรียน
+              </Link>
+              <Link
+                to="/dashboard"
+                className="hidden sm:inline-flex items-center rounded-full px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 transition"
+              >
+                🧑‍🏫 สำหรับครู/ผู้ปกครอง
               </Link>
               {user.role === "admin" && (
                 <Link
                   to="/admin"
-                  className="hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100"
+                  className="hidden sm:inline-flex items-center rounded-full px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 transition"
                 >
-                  Admin
+                  🛠️ Admin
                 </Link>
               )}
             </>
@@ -77,7 +80,7 @@ function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="hidden sm:inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[11px] text-slate-600">
+              <span className="hidden sm:inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px]">
                 {user.name} • {user.role}
               </span>
               <button
@@ -85,17 +88,17 @@ function Navbar() {
                   logout();
                   navigate("/login");
                 }}
-                className="text-xs rounded-full bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-700"
+                className="inline-flex items-center gap-1 rounded-full bg-white text-slate-800 px-3 py-1.5 text-xs font-semibold shadow hover:bg-slate-100"
               >
-                ออกจากระบบ
+                🚪 ออกจากระบบ
               </button>
             </div>
           ) : (
             <Link
               to="/login"
-              className="text-xs rounded-full bg-brand-500 text-white px-3 py-1.5 hover:bg-brand-600"
+              className="inline-flex items-center gap-1 rounded-full bg-white text-slate-900 px-3 py-1.5 text-xs sm:text-sm font-semibold shadow hover:bg-slate-100"
             >
-              เข้าสู่ระบบ
+              🔑 เข้าสู่ระบบ
             </Link>
           )}
         </div>
@@ -105,6 +108,7 @@ function Navbar() {
 }
 
 // ================== หน้า Login ==================
+// ====== หน้า Login (สไตล์ใหม่) ======
 function LoginPage() {
   const { user, login } = useAuth();
   const { showAlert } = useAlert();
@@ -113,12 +117,8 @@ function LoginPage() {
   const [password, setPassword] = useState("teacher123");
   const [error, setError] = useState("");
 
-  // ถ้าล็อกอินแล้วให้เด้งตาม role
   useEffect(() => {
-    if (user) {
-      if (user.role === "admin") navigate("/admin");
-      else navigate("/dashboard");
-    }
+    if (user) navigate("/worksheets");
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -127,7 +127,7 @@ function LoginPage() {
     try {
       await login(email, password);
       showAlert("ล็อกอินสำเร็จ ยินดีต้อนรับคุณครู 🌈", "success");
-      // navigation จะจัดการใน useEffect ด้านบน
+      navigate("/worksheets");
     } catch (err) {
       const msg = err.message || "ล็อกอินไม่สำเร็จ";
       setError(msg);
@@ -136,52 +136,81 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white/90 backdrop-blur rounded-2xl shadow-md p-6 border border-slate-100">
-        <h1 className="text-xl font-semibold mb-1 text-slate-800">
-          เข้าสู่ระบบครู / ผู้ปกครอง
-        </h1>
-        <p className="text-xs text-slate-500 mb-4">
-          ตัวอย่างบัญชี: admin@example.com (admin123), teacher@example.com
-          (teacher123)
-        </p>
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-sky-100 via-pink-50 to-amber-50 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* ตุ๊กตา / ของตกแต่งลอย ๆ */}
+      <div className="pointer-events-none select-none">
+        <span className="hidden md:block absolute left-6 top-6 text-5xl opacity-40">
+          🧸
+        </span>
+        <span className="hidden md:block absolute right-8 bottom-10 text-5xl opacity-40">
+          ✏️
+        </span>
+        <span className="hidden md:block absolute left-10 bottom-6 text-4xl opacity-30">
+          📚
+        </span>
+      </div>
 
-        {error && (
-          <div className="mb-3 text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-            {error}
+      <div className="max-w-md w-full relative">
+        {/* การ์ดหลัก */}
+        <div className="bg-white/95 backdrop-blur rounded-3xl shadow-[0_18px_40px_rgba(148,163,184,0.45)] border border-slate-100 px-6 py-7">
+          {/* หัวการ์ด */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-pink-400 via-amber-300 to-sky-400 flex items-center justify-center text-2xl shadow-md">
+              🎓
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-800">
+                เข้าสู่ระบบครู / ผู้ปกครอง
+              </h1>
+              <p className="text-[11px] text-slate-500">
+                ใช้บัญชีตัวอย่างเพื่อทดลองระบบได้เลย
+              </p>
+            </div>
           </div>
-        )}
+          {error && (
+            <div className="mb-3 text-xs text-red-500 bg-red-50 border border-red-100 rounded-2xl px-3 py-2 flex gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="block text-xs text-slate-600 mb-1">อีเมล</label>
-            <input
-              type="email"
-              className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-slate-600 mb-1">
-              รหัสผ่าน
-            </label>
-            <input
-              type="password"
-              className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-sky-500 text-white text-sm font-semibold py-2 hover:bg-sky-600"
-          >
-            เข้าสู่ระบบ
-          </button>
-        </form>
+          {/* ฟอร์มล็อกอิน */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label className="block text-xs text-slate-600 mb-1">อีเมล</label>
+              <input
+                type="email"
+                className="w-full border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-600 mb-1">
+                รหัสผ่าน
+              </label>
+              <input
+                type="password"
+                className="w-full border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-500 to-pink-500 text-white text-sm font-semibold py-2.5 shadow hover:brightness-110"
+            >
+              เข้าสู่ระบบ
+            </button>
+          </form>
+        </div>
+
+        {/* การ์ดเล็กข้างใต้ */}
+        <div className="mt-4 text-center text-[11px] text-slate-500">
+          ใช้ร่วมกับใบงานหน้าแรกสำหรับเด็ก ๆ ได้ทันที 🌈
+        </div>
       </div>
     </div>
   );
@@ -297,8 +326,7 @@ function PreviewModal({ worksheet, onClose }) {
                 <p className="font-semibold text-slate-700 mb-1">ข้อมูลไฟล์</p>
                 <p className="text-[11px] break-all">
                   ชื่อไฟล์:{" "}
-                  {worksheet.originalName ||
-                    "ยังไม่มีชื่อไฟล์ที่ระบบบันทึกไว้"}
+                  {worksheet.originalName || "ยังไม่มีชื่อไฟล์ที่ระบบบันทึกไว้"}
                 </p>
                 <p className="text-[11px]">
                   สถานะไฟล์:{" "}
@@ -374,8 +402,8 @@ function PreviewModal({ worksheet, onClose }) {
 }
 
 // ================== Grid ใบงานสำหรับนักเรียน (หน้าแรก) ==================
+// ====== Grid ใบงานสำหรับนักเรียน (แทนของเดิม) ======
 function StudentWorksheetGrid() {
-  const { showAlert } = useAlert();
   const [worksheets, setWorksheets] = useState([]);
   const [subject, setSubject] = useState("ทั้งหมด");
   const [grade, setGrade] = useState("ทั้งหมด");
@@ -400,7 +428,6 @@ function StudentWorksheetGrid() {
       setWorksheets(data);
     } catch (err) {
       console.error("โหลดใบงานผิดพลาด:", err);
-      showAlert("โหลดใบงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", "error");
     }
   };
 
@@ -442,155 +469,194 @@ function StudentWorksheetGrid() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-5">
-        {/* หัวข้อสีสดใสสำหรับเด็ก */}
-        <header className="bg-gradient-to-r from-pink-400 via-amber-300 to-sky-400 rounded-3xl text-white p-6 shadow-[0_18px_40px_rgba(248,113,113,0.35)] relative overflow-hidden">
-          <div className="absolute -right-6 -bottom-6 opacity-30 text-6xl">
-            🎨
+      <div className="min-h-[calc(100vh-96px)] bg-gradient-to-b from-sky-50 via-pink-50 to-amber-50">
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 relative">
+          {/* ของตกแต่งลอย ๆ */}
+          <div className="pointer-events-none select-none">
+            <span className="hidden md:block absolute -left-2 top-8 text-4xl opacity-40">
+              🧸
+            </span>
+            <span className="hidden md:block absolute -right-4 top-20 text-4xl opacity-40">
+              ✏️
+            </span>
+            <span className="hidden md:block absolute left-10 bottom-10 text-4xl opacity-30">
+              📚
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 drop-shadow-sm">
-            มุมใบงานของหนู ๆ 👧🧒
-          </h1>
-          <p className="text-sm sm:text-base text-pink-50">
-            เลือกแบบฝึกหัดสนุก ๆ ตาม <span className="font-semibold">วิชา</span>{" "}
-            และ <span className="font-semibold">ระดับชั้น</span>{" "}
-            แล้วโหลดไปทำได้เลย
-          </p>
-        </header>
 
-        {/* ฟิลเตอร์ */}
-        <form
-          onSubmit={handleFilter}
-          className="bg-white/90 backdrop-blur rounded-3xl shadow-md p-4 border border-pink-100 flex flex-col gap-3 md:flex-row md:items-end md:gap-4"
-        >
-          <div className="flex-1">
-            <label className="block text-xs text-slate-500 mb-1">
-              🔍 ค้นหาใบงาน
-            </label>
-            <input
-              className="w-full border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
-              placeholder="เช่น นับเลข, ฝึกอ่าน, คำศัพท์สัตว์..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">🎨 วิชา</label>
-            <select
-              className="border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-            >
-              {SUBJECT_OPTIONS.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">🎒 ชั้น</label>
-            <select
-              className="border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white"
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-            >
-              {GRADE_OPTIONS.map((g) => (
-                <option key={g}>{g}</option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="rounded-2xl bg-gradient-to-r from-pink-400 to-sky-400 text-white text-sm font-semibold px-4 py-2 shadow-sm hover:brightness-110"
-          >
-            ค้นหาเลย ✨
-          </button>
-        </form>
+          {/* หัวข้อสีสดใสสำหรับเด็ก */}
+          <header className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-pink-400 via-amber-300 to-sky-400 text-white shadow-[0_18px_40px_rgba(248,113,113,0.35)]">
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-xl" />
+            <div className="absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-sky-200/30 blur-xl" />
 
-        {/* รายการใบงาน */}
-        {worksheets.length === 0 ? (
-          <div className="text-center text-sm text-slate-500 bg-white/80 rounded-3xl p-6 border border-dashed border-pink-200">
-            ยังไม่มีใบงานให้ดาวน์โหลดเลย 🥺
-            <div className="text-[11px] text-slate-400 mt-1">
-              รอคุณครูอัปโหลดใบงานก่อนนะ
+            <div className="relative flex flex-col md:flex-row items-center gap-4 px-6 py-5">
+              <div className="flex-1">
+                <p className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold mb-2 shadow-sm">
+                  🎓 พื้นที่เรียนรู้สำหรับเด็ก • Printable Worksheets
+                </p>
+                <h1 className="text-2xl sm:text-3xl font-extrabold mb-1 drop-shadow-sm">
+                  มุมใบงานของหนู ๆ 👧🧒
+                </h1>
+                <p className="text-xs sm:text-sm text-pink-50/95 max-w-xl">
+                  เลือกแบบฝึกหัดสนุก ๆ ตาม{" "}
+                  <span className="font-semibold">วิชา</span> และ{" "}
+                  <span className="font-semibold">ระดับชั้น</span>{" "}
+                  แล้วดาวน์โหลดไปพิมพ์หรือให้เด็กทำในแท็บเล็ตได้เลย
+                </p>
+              </div>
+
+              <div className="w-full md:w-52">
+                <div className="bg-white/90 rounded-3xl px-4 py-3 shadow-lg border border-pink-100 flex flex-col items-center text-center">
+                  <div className="text-4xl mb-1">🧮</div>
+                  <p className="text-xs font-semibold text-slate-700">
+                    วันนี้ลองฝึกทำใบงานสัก 1–2 แผ่นกันไหมนะ?
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    ช่วยสร้างนิสัยรักการเรียนรู้ทีละนิด 🌱
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {worksheets.map((w) => (
-              <article
-                key={w.id}
-                className="group bg-white/95 rounded-3xl border border-pink-100 shadow-sm hover:shadow-[0_16px_35px_rgba(248,113,113,0.35)] hover:-translate-y-1 hover:-rotate-1 transition-all duration-200 flex flex-col overflow-hidden"
-              >
-                <div className="h-2 w-full bg-gradient-to-r from-pink-300 via-amber-300 to-sky-300" />
+          </header>
 
-                <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex flex-wrap gap-1">
-                      <span
-                        className={
-                          "text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1 " +
-                          getSubjectBadgeClass(w.subject)
-                        }
-                      >
-                        <span>{getSubjectEmoji(w.subject)}</span>
-                        <span>{w.subject}</span>
-                      </span>
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-lime-100 text-lime-700">
-                        🎒 {w.grade}
-                      </span>
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
-                        ⭐ {w.difficulty || "ง่าย"}
+          {/* ฟิลเตอร์ */}
+          <form
+            onSubmit={handleFilter}
+            className="bg-white/95 backdrop-blur rounded-3xl shadow-md p-4 border border-pink-100 flex flex-col gap-3 md:flex-row md:items-end md:gap-4"
+          >
+            <div className="flex-1">
+              <label className="block text-xs text-slate-500 mb-1">
+                🔍 ค้นหาใบงาน
+              </label>
+              <input
+                className="w-full border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
+                placeholder="เช่น นับเลข, ฝึกอ่าน, คำศัพท์สัตว์..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">
+                🎨 วิชา
+              </label>
+              <select
+                className="border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              >
+                {SUBJECT_OPTIONS.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">
+                🎒 ชั้น
+              </label>
+              <select
+                className="border border-slate-200 rounded-2xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300 bg-white"
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+              >
+                {GRADE_OPTIONS.map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="rounded-2xl bg-gradient-to-r from-pink-400 to-sky-400 text-white text-sm font-semibold px-4 py-2 shadow-sm hover:brightness-110"
+            >
+              ค้นหาเลย ✨
+            </button>
+          </form>
+
+          {/* รายการใบงาน */}
+          {worksheets.length === 0 ? (
+            <div className="text-center text-sm text-slate-500 bg-white/90 rounded-3xl p-6 border border-dashed border-pink-200">
+              ยังไม่มีใบงานให้ดาวน์โหลดเลย 🥺
+              <div className="text-[11px] text-slate-400 mt-1">
+                รอคุณครูอัปโหลดใบงานก่อนนะ
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {worksheets.map((w) => (
+                <article
+                  key={w.id}
+                  className="group bg-white/95 rounded-3xl border border-pink-100 shadow-sm hover:shadow-[0_16px_35px_rgba(248,113,113,0.35)] hover:-translate-y-1 hover:-rotate-1 transition-all duration-200 flex flex-col overflow-hidden"
+                >
+                  <div className="h-2 w-full bg-gradient-to-r from-pink-300 via-amber-300 to-sky-300" />
+
+                  <div className="p-4 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex flex-wrap gap-1">
+                        <span
+                          className={
+                            "text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1 " +
+                            getSubjectBadgeClass(w.subject)
+                          }
+                        >
+                          <span>{getSubjectEmoji(w.subject)}</span>
+                          <span>{w.subject}</span>
+                        </span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-lime-100 text-lime-700">
+                          🎒 {w.grade}
+                        </span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
+                          ⭐ {w.difficulty || "ง่าย"}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400">
+                        {w.pages ? `${w.pages} หน้า` : "หลายหน้า"}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-400">
-                      {w.pages ? `${w.pages} หน้า` : "หลายหน้า"}
-                    </span>
+
+                    <h3 className="text-sm font-semibold line-clamp-2 mb-1 text-slate-800">
+                      {w.title}
+                    </h3>
+
+                    <p className="text-xs text-slate-600 line-clamp-3 mb-2">
+                      {w.description}
+                    </p>
+
+                    <p className="text-[11px] text-slate-400 mt-auto">
+                      โดย {w.uploaderName || "คุณครูใจดี"}
+                    </p>
                   </div>
 
-                  <h3 className="text-sm font-semibold line-clamp-2 mb-1 text-slate-800">
-                    {w.title}
-                  </h3>
-
-                  <p className="text-xs text-slate-600 line-clamp-3 mb-2">
-                    {w.description}
-                  </p>
-
-                  <p className="text-[11px] text-slate-400">
-                    โดย {w.uploaderName || "คุณครูใจดี"}
-                  </p>
-                </div>
-
-                <div className="px-4 pb-4 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPreview(w)}
-                    className="flex-1 rounded-full border border-pink-200 text-pink-600 text-xs font-semibold py-2 hover:bg-pink-50 transition-colors disabled:opacity-40"
-                    disabled={!w.fileUrl}
-                  >
-                    👀 ดูพรีวิว
-                  </button>
-                  {w.fileUrl ? (
-                    <a
-                      href={w.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1 text-center rounded-full bg-gradient-to-r from-amber-300 to-sky-400 text-white text-xs font-semibold py-2 hover:brightness-110 transition-colors"
-                    >
-                      📥 ดาวน์โหลด
-                    </a>
-                  ) : (
+                  <div className="px-4 pb-4 flex gap-2">
                     <button
-                      disabled
-                      className="flex-1 rounded-full bg-slate-200 text-slate-500 text-xs font-semibold py-2 cursor-not-allowed"
+                      type="button"
+                      onClick={() => setPreview(w)}
+                      className="flex-1 rounded-full border border-pink-200 text-pink-600 text-xs font-semibold py-2 hover:bg-pink-50 transition-colors disabled:opacity-40"
+                      disabled={!w.fileUrl}
                     >
-                      ไม่มีไฟล์
+                      👀 ดูพรีวิว
                     </button>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                    {w.fileUrl ? (
+                      <a
+                        href={w.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 text-center rounded-full bg-gradient-to-r from-amber-300 to-sky-400 text-white text-xs font-semibold py-2 hover:brightness-110 transition-colors"
+                      >
+                        📥 ดาวน์โหลด
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="flex-1 rounded-full bg-slate-200 text-slate-500 text-xs font-semibold py-2 cursor-not-allowed"
+                      >
+                        ไม่มีไฟล์
+                      </button>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* modal พรีวิว */}
@@ -602,6 +668,7 @@ function StudentWorksheetGrid() {
 }
 
 // ================== ฟอร์มอัปโหลด + File Manager (แดชบอร์ดครู) ==================
+// ====== ฟอร์มอัปโหลด (สำหรับครู) + File Manager (สไตล์ใหม่) ======
 function TeacherDashboard() {
   const { showAlert } = useAlert();
   const { user } = useAuth();
@@ -622,13 +689,8 @@ function TeacherDashboard() {
   const DIFFICULTY_OPTIONS = ["ง่าย", "ปานกลาง", "ยาก"];
 
   const loadMyFiles = async () => {
-    try {
-      const data = await apiRequest("/api/worksheets/mine");
-      setMyFiles(data);
-    } catch (err) {
-      console.error("โหลดใบงานของฉันผิดพลาด:", err);
-      showAlert("โหลดใบงานของคุณไม่สำเร็จ", "error");
-    }
+    const data = await apiRequest("/api/worksheets/mine");
+    setMyFiles(data);
   };
 
   useEffect(() => {
@@ -644,13 +706,6 @@ function TeacherDashboard() {
       const msg = "กรุณาเลือกไฟล์ใบงานก่อนอัปโหลดนะครับ 🥺";
       setError(msg);
       showAlert(msg, "warning");
-      return;
-    }
-
-    if (user.role !== "teacher" && user.role !== "admin") {
-      const msg = "เฉพาะคุณครูหรือผู้ดูแลเท่านั้นที่อัปโหลดใบงานได้";
-      setError(msg);
-      showAlert(msg, "error");
       return;
     }
 
@@ -701,179 +756,227 @@ function TeacherDashboard() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-      <header className="bg-emerald-500 rounded-2xl text-white p-5 shadow-md">
-        <h1 className="text-2xl font-bold mb-1">แดชบอร์ดครู / ผู้ปกครอง</h1>
-        <p className="text-sm text-emerald-50">
-          อัปโหลดใบงาน เก็บไฟล์เป็นคลังสื่อ และให้นักเรียนดาวน์โหลดได้จากหน้าแรก
-        </p>
-      </header>
+    <div className="min-h-[calc(100vh-96px)] bg-gradient-to-b from-emerald-50 via-sky-50 to-pink-50">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
+        <header className="rounded-3xl bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 text-white p-5 shadow-[0_18px_40px_rgba(16,185,129,0.35)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+          <div>
+            <p className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold mb-2">
+              🧑‍🏫 โหมดสำหรับคุณครู / ผู้ปกครอง
+            </p>
+            <h1 className="text-2xl font-bold mb-1">
+              แดชบอร์ดจัดการใบงานของฉัน
+            </h1>
+            <p className="text-xs sm:text-sm text-emerald-50/90 max-w-xl">
+              อัปโหลดใบงาน เก็บเป็นคลังส่วนตัว และให้นักเรียนดาวน์โหลดจากหน้าแรกได้เลย
+            </p>
+          </div>
+          <div className="bg-white/95 rounded-2xl px-4 py-3 text-xs text-slate-700 shadow-md border border-emerald-100 min-w-[210px]">
+            <p className="font-semibold mb-1">สรุปวันนี้ 📌</p>
+            <p>
+              ใบงานทั้งหมดของคุณ:{" "}
+              <span className="font-bold text-emerald-600">
+                {myFiles.length} แผ่น
+              </span>
+            </p>
+            <p className="text-[11px] text-slate-500 mt-1">
+              แนะนำให้อัปโหลดทีละน้อย แต่สม่ำเสมอ เพื่อสร้างคลังสื่อของตัวเอง 🌱
+            </p>
+          </div>
+        </header>
 
-      {/* ฟอร์มอัปโหลด */}
-      <section className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 space-y-4">
-        <h2 className="text-lg font-semibold">อัปโหลดใบงานใหม่</h2>
-        {user.role !== "teacher" && user.role !== "admin" && (
-          <p className="text-xs text-orange-500 mb-2">
-            * บัญชีของคุณไม่ใช่ครูหรือผู้ดูแล ไม่สามารถอัปโหลดใบงานได้
-          </p>
-        )}
-
-        <form onSubmit={handleUpload} className="grid gap-3 md:grid-cols-2">
-          {error && (
-            <div className="md:col-span-2 text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-              {error}
-            </div>
+        {/* ฟอร์มอัปโหลด */}
+        <section className="bg-white/95 rounded-3xl shadow-md border border-slate-100 p-4 sm:p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xl">📤</span>
+            <h2 className="text-lg font-semibold text-slate-800">
+              อัปโหลดใบงานใหม่
+            </h2>
+          </div>
+          {user.role !== "teacher" && user.role !== "admin" && (
+            <p className="text-xs text-orange-500 mb-2 rounded-2xl bg-orange-50 border border-orange-100 px-3 py-2">
+              * บัญชีของคุณไม่ใช่ครูหรือผู้ดูแล จึงไม่สามารถอัปโหลดใบงานได้
+              แต่ยังดูใบงานหน้าแรกได้ตามปกติค่ะ 🙂
+            </p>
           )}
 
-          <div className="md:col-span-2">
-            <label className="block text-xs text-slate-500 mb-1">
-              ชื่อใบงาน
-            </label>
-            <input
-              className="w-full border rounded-xl px-3 py-2 text-sm"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="เช่น แบบฝึกหัดบวกเลข 1–10"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">วิชา</label>
-            <select
-              className="w-full border rounded-xl px-3 py-2 text-sm"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-            >
-              {SUBJECT_OPTIONS.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">
-              ระดับชั้น
-            </label>
-            <select
-              className="w-full border rounded-xl px-3 py-2 text-sm"
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-            >
-              {GRADE_OPTIONS.map((g) => (
-                <option key={g}>{g}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">ความยาก</label>
-            <select
-              className="w-full border rounded-xl px-3 py-2 text-sm"
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-            >
-              {DIFFICULTY_OPTIONS.map((d) => (
-                <option key={d}>{d}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">
-              จำนวนหน้า (ถ้ามี)
-            </label>
-            <input
-              type="number"
-              min="1"
-              className="w-full border rounded-xl px-3 py-2 text-sm"
-              value={pages}
-              onChange={(e) => setPages(e.target.value)}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-xs text-slate-500 mb-1">
-              คำอธิบายใบงาน
-            </label>
-            <textarea
-              rows={2}
-              className="w-full border rounded-xl px-3 py-2 text-sm"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="เช่น เน้นฝึกการนับเลข / ใช้เวลาประมาณ 15 นาที ฯลฯ"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-xs text-slate-500 mb-1">
-              ไฟล์ใบงาน (PDF / รูปภาพ)
-            </label>
-            <input
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg"
-              onChange={(e) => setFile(e.target.files[0] || null)}
-              className="w-full text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-emerald-600"
-            />
-          </div>
-
-          <div className="md:col-span-2 flex justify-end">
-            <button
-              type="submit"
-              disabled={
-                uploading || (user.role !== "teacher" && user.role !== "admin")
-              }
-              className="rounded-xl bg-emerald-500 text-white text-sm font-semibold px-4 py-2 hover:bg-emerald-600 disabled:bg-slate-300"
-            >
-              {uploading ? "กำลังอัปโหลด..." : "อัปโหลดใบงาน"}
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {/* File Manager */}
-      <section className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 space-y-3">
-        <h2 className="text-lg font-semibold">ใบงานที่ฉันอัปโหลด</h2>
-        {myFiles.length === 0 ? (
-          <p className="text-sm text-slate-500">ยังไม่มีใบงานที่คุณอัปโหลด</p>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {myFiles.map((w) => (
-              <div
-                key={w.id}
-                className="border rounded-xl p-3 text-xs bg-slate-50 flex flex-col gap-1"
-              >
-                <div className="font-semibold text-slate-700 line-clamp-2">
-                  {w.title}
-                </div>
-                <div className="text-slate-500">
-                  {w.subject} • {w.grade}
-                </div>
-                <div className="text-slate-400">
-                  หน้า: {w.pages || "-"} • ความยาก: {w.difficulty}
-                </div>
-                <div className="mt-2 flex justify-between items-center">
-                  {w.fileUrl && (
-                    <a
-                      href={w.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-emerald-600 hover:underline"
-                    >
-                      เปิดไฟล์
-                    </a>
-                  )}
-                  <span className="text-[10px] text-slate-400">ID: {w.id}</span>
-                </div>
+          <form onSubmit={handleUpload} className="grid gap-3 md:grid-cols-2">
+            {error && (
+              <div className="md:col-span-2 text-xs text-red-500 bg-red-50 border border-red-100 rounded-2xl px-3 py-2 flex gap-2">
+                <span>⚠️</span>
+                <span>{error}</span>
               </div>
-            ))}
+            )}
+
+            <div className="md:col-span-2">
+              <label className="block text-xs text-slate-500 mb-1">
+                ชื่อใบงาน
+              </label>
+              <input
+                className="w-full border rounded-2xl px-3 py-2 text-sm border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="เช่น แบบฝึกหัดบวกเลข 1–10"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">
+                วิชา
+              </label>
+              <select
+                className="w-full border rounded-2xl px-3 py-2 text-sm border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 bg-white"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              >
+                {SUBJECT_OPTIONS.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">
+                ระดับชั้น
+              </label>
+              <select
+                className="w-full border rounded-2xl px-3 py-2 text-sm border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 bg-white"
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+              >
+                {GRADE_OPTIONS.map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">
+                ความยาก
+              </label>
+              <select
+                className="w-full border rounded-2xl px-3 py-2 text-sm border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 bg-white"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+              >
+                {DIFFICULTY_OPTIONS.map((d) => (
+                  <option key={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">
+                จำนวนหน้า (ถ้ามี)
+              </label>
+              <input
+                type="number"
+                min="1"
+                className="w-full border rounded-2xl px-3 py-2 text-sm border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300"
+                value={pages}
+                onChange={(e) => setPages(e.target.value)}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs text-slate-500 mb-1">
+                คำอธิบายใบงาน
+              </label>
+              <textarea
+                rows={2}
+                className="w-full border rounded-2xl px-3 py-2 text-sm border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="เช่น เน้นฝึกการนับเลข / ใช้เวลาประมาณ 15 นาที ฯลฯ"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs text-slate-500 mb-1">
+                ไฟล์ใบงาน (PDF / รูปภาพ)
+              </label>
+              <input
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg"
+                onChange={(e) => setFile(e.target.files[0] || null)}
+                className="w-full text-xs file:mr-3 file:rounded-xl file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-emerald-600"
+              />
+            </div>
+
+            <div className="md:col-span-2 flex justify-end">
+              <button
+                type="submit"
+                disabled={
+                  uploading || (user.role !== "teacher" && user.role !== "admin")
+                }
+                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-sky-500 text-white text-sm font-semibold px-5 py-2.5 hover:brightness-110 disabled:bg-slate-300"
+              >
+                {uploading ? "กำลังอัปโหลด..." : "อัปโหลดใบงาน"}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {/* File Manager */}
+        <section className="bg-white/95 rounded-3xl shadow-md border border-slate-100 p-4 sm:p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📚</span>
+            <h2 className="text-lg font-semibold text-slate-800">
+              ใบงานที่ฉันอัปโหลด
+            </h2>
           </div>
-        )}
-      </section>
+          {myFiles.length === 0 ? (
+            <p className="text-sm text-slate-500 bg-slate-50 border border-dashed border-slate-200 rounded-2xl px-3 py-4 text-center">
+              ยังไม่มีใบงานที่คุณอัปโหลดเลยค่ะ
+              <br />
+              <span className="text-[11px] text-slate-400">
+                เริ่มจากอัปโหลดใบงานแรกด้านบนก่อนนะ 🌱
+              </span>
+            </p>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {myFiles.map((w) => (
+                <div
+                  key={w.id}
+                  className="border border-slate-100 rounded-2xl p-3 text-xs bg-slate-50/80 flex flex-col gap-1 hover:bg-white hover:shadow-sm transition"
+                >
+                  <div className="font-semibold text-slate-800 line-clamp-2">
+                    {w.title}
+                  </div>
+                  <div className="text-slate-500">
+                    {w.subject} • {w.grade}
+                  </div>
+                  <div className="text-slate-400">
+                    หน้า: {w.pages || "-"} • ความยาก: {w.difficulty}
+                  </div>
+                  <div className="mt-2 flex justify-between items-center">
+                    {w.fileUrl && (
+                      <a
+                        href={w.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-emerald-600 hover:underline"
+                      >
+                        เปิดไฟล์
+                      </a>
+                    )}
+                    <span className="text-[10px] text-slate-400">
+                      ID: {w.id}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
 
+
 // ================== Admin Panel ==================
+// ====== Admin Panel (สไตล์ใหม่) ======
 function AdminPanel() {
   const { showAlert } = useAlert();
   const [users, setUsers] = useState([]);
@@ -881,17 +984,12 @@ function AdminPanel() {
   const { user } = useAuth();
 
   const loadData = async () => {
-    try {
-      const [u, w] = await Promise.all([
-        apiRequest("/api/admin/users"),
-        apiRequest("/api/admin/worksheets"),
-      ]);
-      setUsers(u);
-      setWorksheets(w);
-    } catch (err) {
-      console.error("โหลดข้อมูล admin ผิดพลาด:", err);
-      showAlert("โหลดข้อมูลสำหรับ Admin ไม่สำเร็จ", "error");
-    }
+    const [u, w] = await Promise.all([
+      apiRequest("/api/admin/users"),
+      apiRequest("/api/admin/worksheets"),
+    ]);
+    setUsers(u);
+    setWorksheets(w);
   };
 
   const deleteWorksheet = async (id) => {
@@ -911,102 +1009,131 @@ function AdminPanel() {
   }, [user]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-      <header className="bg-slate-800 rounded-2xl text-white p-5 shadow-md">
-        <h1 className="text-2xl font-bold mb-1">Admin Panel</h1>
-        <p className="text-sm text-slate-200">
-          จัดการผู้ใช้และใบงานทั้งหมดในระบบ
-        </p>
-      </header>
+    <div className="min-h-[calc(100vh-96px)] bg-slate-950/95">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
+        <header className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-slate-50 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.7)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-slate-700">
+          <div>
+            <p className="inline-flex items-center gap-1 rounded-full bg-sky-500/15 px-3 py-1 text-[11px] font-semibold mb-2 text-sky-200">
+              🛠️ โหมดผู้ดูแลระบบ
+            </p>
+            <h1 className="text-2xl font-bold mb-1">Admin Panel</h1>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+              จัดการผู้ใช้และใบงานทั้งหมดในระบบ เพื่อให้พื้นที่หน้าเด็ก ๆ
+              สะอาดและปลอดภัย
+            </p>
+          </div>
+          <div className="bg-slate-900/80 rounded-2xl px-4 py-3 text-xs text-slate-200 border border-slate-700 min-w-[210px]">
+            <p className="font-semibold mb-1">สรุประบบตอนนี้</p>
+            <p>ผู้ใช้งานทั้งหมด: {users.length} คน</p>
+            <p>ใบงานในระบบ: {worksheets.length} แผ่น</p>
+          </div>
+        </header>
 
-      {/* ตารางผู้ใช้ */}
-      <section className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 space-y-3">
-        <h2 className="text-lg font-semibold">ผู้ใช้ทั้งหมด</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b bg-slate-50">
-                <th className="text-left p-2">ID</th>
-                <th className="text-left p-2">ชื่อ</th>
-                <th className="text-left p-2">อีเมล</th>
-                <th className="text-left p-2">Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id} className="border-b last:border-0">
-                  <td className="p-2">{u.id}</td>
-                  <td className="p-2">{u.name}</td>
-                  <td className="p-2">{u.email}</td>
-                  <td className="p-2">{u.role}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ตารางใบงานทั้งหมด */}
-      <section className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 space-y-3">
-        <h2 className="text-lg font-semibold">ใบงานทั้งหมด</h2>
-        {worksheets.length === 0 ? (
-          <p className="text-sm text-slate-500">ยังไม่มีใบงานในระบบ</p>
-        ) : (
-          <div className="overflow-x-auto">
+        {/* Users */}
+        <section className="bg-slate-900/90 rounded-3xl shadow-md border border-slate-700 p-4 sm:p-5 space-y-3 text-slate-50">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            👥 ผู้ใช้ทั้งหมด
+          </h2>
+          <div className="overflow-x-auto rounded-2xl border border-slate-700">
             <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b bg-slate-50">
+              <thead className="bg-slate-900/95">
+                <tr className="border-b border-slate-700 text-slate-300">
                   <th className="text-left p-2">ID</th>
-                  <th className="text-left p-2">ชื่อใบงาน</th>
-                  <th className="text-left p-2">วิชา</th>
-                  <th className="text-left p-2">ชั้น</th>
-                  <th className="text-left p-2">โดย</th>
-                  <th className="text-left p-2">ไฟล์</th>
-                  <th className="text-left p-2">จัดการ</th>
+                  <th className="text-left p-2">ชื่อ</th>
+                  <th className="text-left p-2">อีเมล</th>
+                  <th className="text-left p-2">Role</th>
                 </tr>
               </thead>
               <tbody>
-                {worksheets.map((w) => (
-                  <tr key={w.id} className="border-b last:border-0">
-                    <td className="p-2">{w.id}</td>
-                    <td className="p-2 max-w-[200px] truncate">{w.title}</td>
-                    <td className="p-2">{w.subject}</td>
-                    <td className="p-2">{w.grade}</td>
-                    <td className="p-2">{w.uploaderName}</td>
+                {users.map((u) => (
+                  <tr
+                    key={u.id}
+                    className="border-b border-slate-800 last:border-0 odd:bg-slate-900/60 even:bg-slate-900/30"
+                  >
+                    <td className="p-2">{u.id}</td>
+                    <td className="p-2">{u.name}</td>
+                    <td className="p-2">{u.email}</td>
                     <td className="p-2">
-                      {w.fileUrl ? (
-                        <a
-                          href={w.fileUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-sky-600 underline"
-                        >
-                          เปิด
-                        </a>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td className="p-2">
-                      <button
-                        onClick={() => deleteWorksheet(w.id)}
-                        className="px-2 py-1 rounded bg-red-500 text-white"
-                      >
-                        ลบ
-                      </button>
+                      <span className="inline-flex rounded-full px-2 py-0.5 text-[11px] bg-slate-800 border border-slate-600">
+                        {u.role}
+                      </span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
-      </section>
+        </section>
+
+        {/* Worksheets */}
+        <section className="bg-slate-900/90 rounded-3xl shadow-md border border-slate-700 p-4 sm:p-5 space-y-3 text-slate-50">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            📄 ใบงานทั้งหมด
+          </h2>
+          {worksheets.length === 0 ? (
+            <p className="text-sm text-slate-400">ยังไม่มีใบงานในระบบเลย</p>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-slate-700">
+              <table className="w-full text-xs">
+                <thead className="bg-slate-900/95">
+                  <tr className="border-b border-slate-700 text-slate-300">
+                    <th className="text-left p-2">ID</th>
+                    <th className="text-left p-2">ชื่อใบงาน</th>
+                    <th className="text-left p-2">วิชา</th>
+                    <th className="text-left p-2">ชั้น</th>
+                    <th className="text-left p-2">โดย</th>
+                    <th className="text-left p-2">ไฟล์</th>
+                    <th className="text-left p-2">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {worksheets.map((w) => (
+                    <tr
+                      key={w.id}
+                      className="border-b border-slate-800 last:border-0 odd:bg-slate-900/60 even:bg-slate-900/30"
+                    >
+                      <td className="p-2">{w.id}</td>
+                      <td className="p-2 max-w-[220px] truncate">{w.title}</td>
+                      <td className="p-2">{w.subject}</td>
+                      <td className="p-2">{w.grade}</td>
+                      <td className="p-2">{w.uploaderName}</td>
+                      <td className="p-2">
+                        {w.fileUrl ? (
+                          <a
+                            href={w.fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-sky-300 underline"
+                          >
+                            เปิด
+                          </a>
+                        ) : (
+                          <span className="text-slate-500">-</span>
+                        )}
+                      </td>
+                      <td className="p-2">
+                        <button
+                          onClick={() => deleteWorksheet(w.id)}
+                          className="px-2 py-1 rounded-full bg-rose-500 text-white text-[11px] hover:bg-rose-600"
+                        >
+                          ลบ
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
 
 // ================== App Routes หลัก ==================
+
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -1016,12 +1143,14 @@ export default function App() {
       <Navbar />
 
       <Routes>
-        {/* หน้าแรก: ใบงานนักเรียน (ไม่บังคับล็อกอิน) */}
-        <Route path="/" element={<StudentWorksheetGrid />} />
+        {/* 🔹 หน้าแรก: ให้เป็นหน้าล็อกอิน */}
+        <Route path="/" element={<LoginPage />} />
 
-        {/* หน้า Login */}
+        {/* หน้า Login (จะซ้ำกับ / ก็ได้ เผื่อเรียกตรง ๆ */}
         <Route path="/login" element={<LoginPage />} />
 
+        {/* ใบงานนักเรียน: ย้ายมาอยู่ /worksheets */}
+        <Route path="/worksheets" element={<StudentWorksheetGrid />} />
         {/* แดชบอร์ดครู/ผู้ปกครอง */}
         <Route
           path="/dashboard"
@@ -1042,7 +1171,7 @@ export default function App() {
           }
         />
 
-        {/* เส้นทางอื่น ๆ ส่งกลับหน้าแรก */}
+        {/* เส้นทางอื่น ๆ ส่งกลับหน้าล็อกอิน */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
 
