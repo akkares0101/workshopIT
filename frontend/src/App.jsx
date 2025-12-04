@@ -246,7 +246,7 @@ function PreviewModal({ worksheet, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-pink-50 via-sky-50 to-violet-50 rounded-3xl max-w-3xl w-full mx-4 shadow-[0_18px_45px_rgba(15,23,42,0.35)] overflow-hidden flex flex-col border border-white/70">
+      <div className="bg-gradient-to-br from-pink-50 via-sky-50 to-violet-50 rounded-3xl max-w-2xl w-full mx-4 shadow-[0_18px_45px_rgba(15,23,42,0.35)] overflow-hidden flex flex-col border border-white/70">
         {/* HEADER */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100/70 bg-white/70 backdrop-blur">
           <div className="flex items-center gap-2">
@@ -353,7 +353,7 @@ function PreviewModal({ worksheet, onClose }) {
                 <img
                   src={url}
                   alt={worksheet.title}
-                  className="max-h-[55vh] w-full object-contain bg-white"
+                  className="max-h-[40vh] w-full object-contain bg-white"
                 />
               )}
 
@@ -361,7 +361,7 @@ function PreviewModal({ worksheet, onClose }) {
                 <iframe
                   src={url}
                   title={worksheet.title}
-                  className="w-full h-[55vh] bg-white"
+                  className="w-full h-[40vh] bg-white"
                 />
               )}
 
@@ -400,6 +400,175 @@ function PreviewModal({ worksheet, onClose }) {
     </div>
   );
 }
+// ====== Modal แก้ไขใบงาน (เฉพาะ Admin) ======
+function EditWorksheetModal({ worksheet, onClose, onSave }) {
+  const [title, setTitle] = useState(worksheet.title || "");
+  const [subject, setSubject] = useState(worksheet.subject || "ภาษาไทย");
+  const [grade, setGrade] = useState(worksheet.grade || "อนุบาล 3-4");
+  const [difficulty, setDifficulty] = useState(worksheet.difficulty || "ง่าย");
+  const [pages, setPages] = useState(
+    worksheet.pages != null ? String(worksheet.pages) : ""
+  );
+  const [description, setDescription] = useState(worksheet.description || "");
+
+  const SUBJECT_OPTIONS = ["ภาษาไทย", "คณิตศาสตร์", "ภาษาอังกฤษ"];
+  const GRADE_OPTIONS = [
+    "อนุบาล 3–4 ปี",
+    "อนุบาล 4–5 ปี",
+    "อนุบาล 5–6 ปี",
+    "ประถมต้น",
+    "ประถมปลาย",
+  ];
+  const DIFFICULTY_OPTIONS = ["ง่าย", "ปานกลาง", "ยาก"];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({
+      title,
+      subject,
+      grade,
+      difficulty,
+      pages,
+      description,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-amber-50 via-pink-50 to-sky-50 rounded-3xl max-w-lg w-full mx-4 shadow-[0_18px_45px_rgba(15,23,42,0.35)] overflow-hidden border border-white/70">
+        {/* HEADER */}
+        <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100/70 bg-white/80">
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-amber-400 via-pink-400 to-sky-400 flex items-center justify-center text-lg">
+              ✏️
+            </div>
+            <div>
+              <h3 className="text-sm sm:text-base font-semibold text-slate-800">
+                แก้ไขใบงาน
+              </h3>
+              <p className="text-[11px] text-slate-500 line-clamp-1">
+                ID: {worksheet.id} • โดย {worksheet.uploaderName}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-800 text-lg leading-none px-2 rounded-full hover:bg-slate-100"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* BODY: ฟอร์มแก้ไข */}
+        <form onSubmit={handleSubmit} className="px-4 py-4 space-y-3 text-xs">
+          <div>
+            <label className="block text-[11px] text-slate-600 mb-1">
+              ชื่อใบงาน
+            </label>
+            <input
+              className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="เช่น แบบฝึกหัดบวกเลข 1–10"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] text-slate-600 mb-1">
+                วิชา
+              </label>
+              <select
+                className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              >
+                {SUBJECT_OPTIONS.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] text-slate-600 mb-1">
+                ระดับชั้น
+              </label>
+              <select
+                className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
+                value={grade}
+                onChange={(e) => setGrade(e.target.value)}
+              >
+                {GRADE_OPTIONS.map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] text-slate-600 mb-1">
+                ความยาก
+              </label>
+              <select
+                className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+              >
+                {DIFFICULTY_OPTIONS.map((d) => (
+                  <option key={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] text-slate-600 mb-1">
+                จำนวนหน้า (ปล่อยว่างได้)
+              </label>
+              <input
+                type="number"
+                min="1"
+                className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                value={pages}
+                onChange={(e) => setPages(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] text-slate-600 mb-1">
+              คำอธิบายใบงาน
+            </label>
+            <textarea
+              rows={3}
+              className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="เช่น เน้นฝึกการนับเลข / ใช้เวลาประมาณ 15 นาที ฯลฯ"
+            />
+          </div>
+
+          {/* FOOTER ปุ่มบันทึก / ยกเลิก */}
+          <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-1.5 rounded-full border border-slate-200 text-[11px] text-slate-600 hover:bg-slate-50"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 rounded-full bg-gradient-to-r from-pink-400 via-amber-400 to-sky-400 text-[11px] font-semibold text-white hover:brightness-110"
+            >
+              ✅ บันทึกการแก้ไข
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 // ================== Grid ใบงานสำหรับนักเรียน (หน้าแรก) ==================
 // ====== Grid ใบงานสำหรับนักเรียน (แทนของเดิม) ======
@@ -411,7 +580,14 @@ function StudentWorksheetGrid() {
   const [preview, setPreview] = useState(null);
 
   const SUBJECT_OPTIONS = ["ทั้งหมด", "ภาษาไทย", "คณิตศาสตร์", "ภาษาอังกฤษ"];
-  const GRADE_OPTIONS = ["ทั้งหมด", "อนุบาล", "ประถมต้น", "ประถมปลาย"];
+  const GRADE_OPTIONS = [
+    "ทั้งหมด",
+    "อนุบาล 3-4 ปี",
+    "อนุบาล 4-5 ปี",
+    "อนุบาล 5-6 ปี",
+    "ประถมต้น",
+    "ประถมปลาย",
+  ];
 
   const loadWorksheets = async () => {
     try {
@@ -677,7 +853,7 @@ function TeacherDashboard() {
 
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("ภาษาไทย");
-  const [grade, setGrade] = useState("อนุบาล");
+  const [grade, setGrade] = useState("อนุบาล 3-4 ปี");
   const [difficulty, setDifficulty] = useState("ง่าย");
   const [pages, setPages] = useState("");
   const [description, setDescription] = useState("");
@@ -685,7 +861,14 @@ function TeacherDashboard() {
   const [error, setError] = useState("");
 
   const SUBJECT_OPTIONS = ["ภาษาไทย", "คณิตศาสตร์", "ภาษาอังกฤษ"];
-  const GRADE_OPTIONS = ["อนุบาล", "ประถมต้น", "ประถมปลาย"];
+  const GRADE_OPTIONS = [
+    "อนุบาล 3-4 ปี",
+    "อนุบาล 4-5 ปี",
+    "อนุบาล 5-6 ปี",
+    "ประถมต้น",
+    "ประถมปลาย",
+  ];
+
   const DIFFICULTY_OPTIONS = ["ง่าย", "ปานกลาง", "ยาก"];
 
   const loadMyFiles = async () => {
@@ -768,7 +951,8 @@ function TeacherDashboard() {
               แดชบอร์ดจัดการใบงานของฉัน
             </h1>
             <p className="text-xs sm:text-sm text-emerald-50/90 max-w-xl">
-              อัปโหลดใบงาน เก็บเป็นคลังส่วนตัว และให้นักเรียนดาวน์โหลดจากหน้าแรกได้เลย
+              อัปโหลดใบงาน เก็บเป็นคลังส่วนตัว
+              และให้นักเรียนดาวน์โหลดจากหน้าแรกได้เลย
             </p>
           </div>
           <div className="bg-white/95 rounded-2xl px-4 py-3 text-xs text-slate-700 shadow-md border border-emerald-100 min-w-[210px]">
@@ -821,9 +1005,7 @@ function TeacherDashboard() {
             </div>
 
             <div>
-              <label className="block text-xs text-slate-500 mb-1">
-                วิชา
-              </label>
+              <label className="block text-xs text-slate-500 mb-1">วิชา</label>
               <select
                 className="w-full border rounded-2xl px-3 py-2 text-sm border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 bg-white"
                 value={subject}
@@ -907,7 +1089,8 @@ function TeacherDashboard() {
               <button
                 type="submit"
                 disabled={
-                  uploading || (user.role !== "teacher" && user.role !== "admin")
+                  uploading ||
+                  (user.role !== "teacher" && user.role !== "admin")
                 }
                 className="rounded-2xl bg-gradient-to-r from-emerald-500 to-sky-500 text-white text-sm font-semibold px-5 py-2.5 hover:brightness-110 disabled:bg-slate-300"
               >
@@ -974,14 +1157,13 @@ function TeacherDashboard() {
   );
 }
 
-
-// ================== Admin Panel ==================
-// ====== Admin Panel (สไตล์ใหม่) ======
+// ================== Admin Panel (สไตล์ใหม่ + modal แก้ไข) ==================
 function AdminPanel() {
   const { showAlert } = useAlert();
   const [users, setUsers] = useState([]);
   const [worksheets, setWorksheets] = useState([]);
   const { user } = useAuth();
+  const [editingWorksheet, setEditingWorksheet] = useState(null);
 
   const loadData = async () => {
     const [u, w] = await Promise.all([
@@ -1000,6 +1182,21 @@ function AdminPanel() {
       showAlert("ลบใบงานจากระบบเรียบร้อยแล้ว 🧹", "success");
     } catch (err) {
       showAlert(err.message || "ลบใบงานไม่สำเร็จ", "error");
+    }
+  };
+
+  // ✅ ฟังก์ชันบันทึกจาก modal
+  const handleSaveEdit = async (id, payload) => {
+    try {
+      await apiRequest(`/api/worksheets/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+       await loadData();
+      setEditingWorksheet(null);
+      showAlert("อัปเดตใบงานเรียบร้อยแล้ว ✏️", "success");
+    } catch (err) {
+      showAlert(err.message || "อัปเดตใบงานไม่สำเร็จ", "error");
     }
   };
 
@@ -1113,12 +1310,20 @@ function AdminPanel() {
                         )}
                       </td>
                       <td className="p-2">
-                        <button
-                          onClick={() => deleteWorksheet(w.id)}
-                          className="px-2 py-1 rounded-full bg-rose-500 text-white text-[11px] hover:bg-rose-600"
-                        >
-                          ลบ
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setEditingWorksheet(w)}  // ✅ เปิด modal
+                            className="px-2 py-1 rounded bg-amber-500 text-white text-[11px] hover:bg-amber-600"
+                          >
+                            แก้ไข
+                          </button>
+                          <button
+                            onClick={() => deleteWorksheet(w.id)}
+                            className="px-2 py-1 rounded bg-red-500 text-white text-[11px] hover:bg-red-600"
+                          >
+                            ลบ
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1128,9 +1333,23 @@ function AdminPanel() {
           )}
         </section>
       </div>
+
+      {/* ✅ เรียกใช้ EditWorksheetModal ตรงนี้ */}
+      {editingWorksheet && (
+        <EditWorksheetModal
+          worksheet={editingWorksheet}
+          onClose={() => setEditingWorksheet(null)}
+          onSave={(payload) =>
+            handleSaveEdit(editingWorksheet.id, payload)
+          }
+        />
+      )}
     </div>
   );
 }
+
+
+
 
 // ================== App Routes หลัก ==================
 
@@ -1176,7 +1395,7 @@ export default function App() {
       </Routes>
 
       <footer className="mt-auto border-t border-slate-200 py-3 text-center text-[11px] text-slate-400">
-        ระบบสื่อใบงานสำหรับเด็ก • สร้างด้วย Node.js + React + TailwindCSS
+        ระบบสื่อใบงานสำหรับเด็ก • Media & Training Co., Ltd. | Trang
       </footer>
     </div>
   );

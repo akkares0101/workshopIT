@@ -1,43 +1,16 @@
 [
   {
-    "id": 1764753646940,
-    "title": "แบบฝึกหัดคัดลายมือ ก-ฮ",
-    "subject": "ภาษาไทย",
-    "grade": "อนุบาล",
-    "description": "",
-    "difficulty": "ง่าย",
-    "pages": 1,
-    "fileUrl": "http://localhost:4000/uploads/1764753646935-482126334_654235267131642_3157999005241465589_n.jpg",
-    "originalName": "482126334_654235267131642_3157999005241465589_n.jpg",
-    "uploadedBy": 1,
-    "uploaderName": "Admin",
-    "createdAt": "2025-12-03T09:20:46.940Z"
-  },
-  {
-    "id": 1764753568163,
-    "title": "แบบฝึดหัดบวกเลข 1-10",
+    "id": 1764823635851,
+    "title": "แบบฝึกหัดบวกเลข 1-10",
     "subject": "คณิตศาสตร์",
-    "grade": "อนุบาล",
+    "grade": "อนุบาล 3-4 ปี",
     "description": "",
     "difficulty": "ง่าย",
     "pages": 1,
-    "fileUrl": "http://localhost:4000/uploads/1764753568146-87952277_782474238828795_8008244575279775744_n.png",
+    "fileUrl": "http://localhost:4000/uploads/1764823635839-87952277_782474238828795_8008244575279775744_n.png",
     "originalName": "87952277_782474238828795_8008244575279775744_n.png",
-    "uploadedBy": 1,
-    "uploaderName": "Admin",
-    "createdAt": "2025-12-03T09:19:28.163Z"
-  },
-  {
-    "id": 1764754064241,
-    "title": "แบบฝึกหัดภาษาอังกฤษ",
-    "subject": "ภาษาอังกฤษ",
-    "grade": "อนุบาล",
-    "description": "",
-    "difficulty": "ง่าย",
-    "fileUrl": "http://localhost:4000/uploads/1764754064224-481775310_652625270625975_5299534884688332762_n.jpg",
-    "originalName": "481775310_652625270625975_5299534884688332762_n.jpg",
-    "uploadedBy": 1,
-    "uploaderName": "Admin",
-    "createdAt": "2025-12-03T09:27:44.241Z"
+    "uploadedBy": 2,
+    "uploaderName": "ครู A",
+    "createdAt": "2025-12-04T04:47:15.851Z"
   }
 ]

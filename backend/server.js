@@ -58,27 +58,32 @@ const users = [
     password: "parent123",
     role: "parent",
   },
+  {
+    id: 4,
+    name: "ผู้ใช้งานคนที่1",
+    email: "akkares.gr@gmail.com",
+    password: "2546",
+    role: "parent",
+  },
 ];
 
 // ====== ใบงาน + ฟังก์ชันโหลด/บันทึกลงไฟล์ ======
 let worksheets = [
-  // ตัวอย่างใบงานเริ่มต้น
   {
     id: 1,
     title: "แบบฝึกหัดนับเลข 1–10",
     subject: "คณิตศาสตร์",
-    grade: "อนุบาล",
+    grade: "อนุบาล 3-4 ปี",  // 
     description: "ฝึกนับเลขง่าย ๆ พร้อมรูปภาพ",
     difficulty: "ง่าย",
     pages: 2,
-    fileUrl: "", // ยังไม่มีไฟล์จริง
+    fileUrl: "",
     originalName: "",
     uploadedBy: 2,
     uploaderName: "ครู A",
     createdAt: new Date(),
   },
 ];
-
 function loadWorksheets() {
   try {
     if (!fs.existsSync(worksheetsFile)) {
@@ -302,6 +307,52 @@ app.delete(
     res.json({ message: "ลบใบงานเรียบร้อย" });
   }
 );
+// แก้ไขใบงาน (admin เท่านั้น)
+app.put(
+  "/api/worksheets/:id",
+  authMiddleware,
+  requireRole("admin"),
+  (req, res) => {
+    const id = Number(req.params.id);
+
+    console.log("รับคำขอแก้ไขใบงาน id =", id);
+    console.log("ids ที่มีอยู่ตอนนี้ =", worksheets.map((w) => w.id));
+
+    const worksheet = worksheets.find((w) => w.id === id);
+
+    if (!worksheet) {
+      return res.status(404).json({ message: "ไม่พบใบงาน" });
+    }
+
+    const { title, subject, grade, description, difficulty, pages } = req.body;
+
+    if (title !== undefined) worksheet.title = title;
+    if (subject !== undefined) worksheet.subject = subject;
+    if (grade !== undefined) worksheet.grade = grade;
+    if (description !== undefined) worksheet.description = description;
+    if (difficulty !== undefined) worksheet.difficulty = difficulty;
+
+    if (pages !== undefined) {
+      if (pages === "" || pages === null) {
+        worksheet.pages = undefined;
+      } else {
+        const num = Number(pages);
+        worksheet.pages = Number.isNaN(num) ? worksheet.pages : num;
+      }
+    }
+
+    // ⬅ สำคัญ: บันทึกลงไฟล์ทุกครั้งที่มีการแก้ไข
+    saveWorksheets();
+
+    return res.json({
+      message: "อัปเดตใบงานเรียบร้อยแล้ว",
+      worksheet,
+    });
+  }
+);
+
+
+
 
 // ----- Admin Routes -----
 app.get(
